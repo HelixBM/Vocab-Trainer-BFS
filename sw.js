@@ -1,4 +1,5 @@
-const CACHE_NAME = 'vocab-bfp1-v3'; // Bumped to v3 to force the update
+// Auto-generate cache version from timestamp to force updates on every deployment
+const CACHE_NAME = 'vocab-bfp1-' + new Date().toISOString().split('T')[0];
 const ASSETS = [
   './',
   './index.html',
