@@ -1,2 +1,2 @@
-# Vocab-Trainer-BFP1-Eng-Ger
-Four modes for learning your English vocab for English class.
+# Vocab-Trainer-BFS
+Learn your English vocabulary anytime, anywhere.
