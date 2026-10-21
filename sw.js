@@ -1,16 +1,19 @@
-// Auto-generate cache version from timestamp to force updates on every deployment
-const CACHE_NAME = 'vocab-bfp1-' + new Date().toISOString().split('T')[0];
+// Raise this version every time you upload a new version of the app.
+const CACHE_NAME = 'vocab-v12';
 const ASSETS = [
   './',
   './index.html',
+  './db.js',
+  './answers.js',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './icon-maskable-512.png'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS.map(url => new Request(url, { cache: 'reload' }))))
   );
   self.skipWaiting();
 });
@@ -24,30 +27,22 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// UPDATED FETCH EVENT
+// Pages, scripts and data: network first, so students get updates on the first visit.
+// Icons: cache first. Offline, everything comes from the cache.
 self.addEventListener('fetch', event => {
-  // Only handle GET requests (skip POSTs, etc.)
-  if (event.request.method !== 'GET') return;
+  const req = event.request;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== location.origin) return;
 
-  event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      // 1. Always fetch the newest version from the network in the background
-      const fetchPromise = fetch(event.request).then(networkResponse => {
-        // Update the cache with the fresh response
-        if (networkResponse && networkResponse.status === 200) {
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, networkResponse.clone());
-          });
+  const networkFirst = req.mode === 'navigate' || /\.(html|js|json)$/.test(url.pathname);
+  event.respondWith(networkFirst
+    ? fetch(req).then(res => {
+        if (res.ok) {
+          const copy = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
         }
-        return networkResponse;
-      }).catch(err => {
-        // Network failed (user is offline), just silently fail the background fetch
-        console.log('Offline: using cached version for', event.request.url);
-      });
-
-      // 2. Return the cached response immediately if we have it. 
-      // If we don't have it in cache, wait for the network fetch to finish.
-      return cachedResponse || fetchPromise;
-    })
+        return res;
+      }).catch(() => caches.match(req, { ignoreSearch: true }))
+    : caches.match(req).then(cached => cached || fetch(req))
   );
 });

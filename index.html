@@ -3,209 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VOCABULARY TRAINER — BFS</title>
+<title>Vocabulary Trainer — BFS</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a1a">
+<meta name="theme-color" content="#faf8f3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="VOCABULARY TRAINER">
+<meta name="apple-mobile-web-app-title" content="Vocab Trainer">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 <style>
-:root {
-  --bg: #f5f0e8;
-  --fg: #1a1a1a;
-  --border: #1a1a1a;
-  --card: #ffffff;
-  --yellow: #ffcc00;
-  --blue: #0055ff;
-  --red: #ff4422;
-  --green: #00aa44;
-  --muted: #e8e4dc;
-  --muted-light: #f0ede8;
-  --sh: 5px 5px 0px var(--border);
-  --sh-sm: 3px 3px 0px var(--border);
-  --sh-lg: 8px 8px 0px var(--border);
+:root{
+  --bg:#faf8f3; --fg:#1d1d1f; --muted:#6e6a63; --card:#fff; --line:#e4dfd5; --soft:#f1ede4;
+  --accent:#ffcc00; --accent-hover:#f2c200; --accent-ink:#1d1d1f;
+  --ok:#17803d; --ok-bg:#e2f5e8; --bad:#c8341f; --bad-bg:#fde7e3;
+  --r:12px; color-scheme:light;
 }
-html.dark {
-  --bg: #121212; --fg: #f5f0e8; --border: #f5f0e8;
-  --card: #1e1e1e; --muted: #2e2e2e; --muted-light: #252525;
+html.dark{
+  --bg:#141413; --fg:#f2efe8; --muted:#a29e96; --card:#1f1e1c; --line:#34322e; --soft:#2a2926;
+  --ok:#5ccf8a; --ok-bg:#143322; --bad:#ff8a78; --bad-bg:#3d1a15; color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;transition:background .2s,color .2s}
+[hidden]{display:none!important}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;min-height:100dvh;line-height:1.4;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:active:not(:disabled){transform:scale(.98)}
+:focus-visible{outline:3px solid var(--fg);outline-offset:2px}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
 
-/* === Header === */
-.site-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:3px solid var(--border);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;transition:background .2s}
-.logo{font-size:22px;font-weight:800;letter-spacing:-.05em;text-transform:uppercase;font-style:italic}
-.header-btns{display:flex;gap:8px;align-items:center}
-.icon-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;border:3px solid var(--border);background:var(--card);color:var(--fg);cursor:pointer;transition:all .1s;font-family:inherit;font-size:18px}
-.icon-btn:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--border)}
-.icon-btn:active{transform:translate(2px,2px);box-shadow:none}
+/* === Header (hidden during a round) === */
+.site-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:6px 8px 6px 16px}
+.logo{font-weight:700;font-size:17px;margin-right:auto}
+body.in-round .site-header{display:none}
+.icon-btn{min-width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:none;background:none;border-radius:var(--r);padding:0 8px;font-weight:600;font-variant-numeric:tabular-nums}
 
-/* === Layout === */
-.wrap{width:100%;max-width:640px;margin:0 auto;padding:2rem 1.25rem}
+/* === Layout & type === */
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 24px}
 .screen{display:none}.screen.active{display:block}
-
-/* === Typography === */
-.page-title{font-size:clamp(30px,7vw,56px);font-weight:800;text-transform:uppercase;letter-spacing:-.04em;line-height:1;margin-bottom:.25rem}
-.page-sub{font-size:13px;font-weight:500;opacity:.55;margin-bottom:1.5rem}
-.section-label{display:inline-block;background:var(--fg);color:var(--bg);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:3px 9px;margin-bottom:.75rem}
-.sub{font-size:13px;opacity:.6;margin-bottom:1.25rem}
-.pill{display:inline-block;font-size:10px;font-weight:700;padding:3px 10px;border:2px solid var(--border);text-transform:uppercase;letter-spacing:.05em;background:var(--muted);color:var(--fg)}
+h1{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:20px}
+.label{font-size:13px;font-weight:600;color:var(--muted);margin:20px 0 8px}
+.hint{font-size:13px;color:var(--muted)}
 
 /* === Buttons === */
-.btn{cursor:pointer;padding:10px 20px;border:3px solid var(--border);background:var(--card);color:var(--fg);font-size:13px;font-weight:700;font-family:inherit;text-transform:uppercase;letter-spacing:.03em;transition:all .1s;box-shadow:var(--sh-sm)}
-.btn:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:var(--sh)}
-.btn:active:not(:disabled){transform:translate(3px,3px);box-shadow:none}
-.btn:disabled{opacity:.35;cursor:default;pointer-events:none}
-.btn-primary{background:var(--blue);color:#fff;border-color:var(--border)}
-.btn-yellow{background:var(--yellow);color:#1a1a1a;border-color:var(--border)}
-.btn-red{background:var(--red);color:#fff;border-color:var(--border)}
-.btn-lg{padding:16px 24px;font-size:18px;font-weight:800;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--sh)}
-.btn-sm{padding:7px 16px;font-size:11px;box-shadow:var(--sh-sm)}
-.back-link{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--fg);cursor:pointer;margin-bottom:1.5rem;background:none;border:none;font-family:inherit;text-transform:uppercase;letter-spacing:.05em;padding:0;opacity:.55}
-.back-link:hover{opacity:1}
+.btn{min-height:48px;padding:0 20px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);font-weight:600;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background-color .15s}
+.btn-primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn-block{width:100%}
+.btn:disabled{opacity:.4;cursor:default}
+.btn-row{display:flex;gap:10px}.btn-row .btn{flex:1}
+.link{background:none;border:none;color:var(--muted);font-weight:600;font-size:14px;min-height:44px;display:inline-flex;align-items:center;margin-bottom:4px}
 
-/* === Top Bar === */
-.top-bar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.75rem;padding-bottom:1.25rem;border-bottom:3px solid var(--border)}
-.streak-box{background:var(--yellow);color:#1a1a1a;border:3px solid var(--border);box-shadow:var(--sh-sm);padding:10px 14px;display:flex;flex-direction:column;align-items:center;min-width:72px;gap:2px}
-.streak-num{font-size:24px;font-weight:800;line-height:1}
-.streak-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;opacity:.65}
-.top-bar-right{display:flex;gap:8px;align-items:flex-start}
+/* === List rows (units, modes) === */
+.list{display:flex;flex-direction:column;gap:8px}
+.row{width:100%;display:flex;align-items:center;gap:14px;min-height:60px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);text-align:left;transition:background-color .15s}
+.row-main{flex:1;min-width:0}
+.row-title{display:block;font-weight:600;font-size:16px}
+.row-meta{display:block;font-size:13px;color:var(--muted)}
+.count{font-size:13px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chev{width:18px;height:18px;color:var(--muted)}
+.mode-ic{width:40px;height:40px;border-radius:10px;background:var(--soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.row.alert{border-color:var(--accent);margin-bottom:16px}
+.row.alert .mode-ic{background:var(--accent);color:var(--accent-ink)}
 
-/* === Weak Alert === */
-.weak-word-alert{background:#fff0ee;color:#cc2200;border:3px solid var(--border);box-shadow:var(--sh-sm);padding:12px 16px;font-size:12px;font-weight:700;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;text-transform:uppercase;letter-spacing:.03em;transition:all .1s}
-html.dark .weak-word-alert{background:#2a1010;color:#ff7755}
-.weak-word-alert:hover{transform:translate(-1px,-1px);box-shadow:var(--sh)}
-.weak-word-alert:active{transform:translate(2px,2px);box-shadow:none}
+/* === Custom pages === */
+details.custom{margin-top:12px}
+details.custom summary{list-style:none;color:var(--muted);font-weight:600;font-size:14px;min-height:44px;display:inline-flex;align-items:center;cursor:pointer}
+details.custom summary::-webkit-details-marker{display:none}
+details.custom[open] summary{color:var(--fg)}
+.range-row{display:flex;align-items:center;gap:8px;margin:4px 0 12px;flex-wrap:wrap}
+.num{width:76px;min-height:44px;padding:0 8px;border:1px solid var(--line);border-radius:10px;background:var(--card);text-align:center;font-size:16px}
+.bubbles{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:4px;margin-top:8px}
+.pb{height:44px;border:1px solid var(--line);border-radius:8px;background:var(--card);font-size:14px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.pb.in{background:var(--soft);color:var(--fg)}
+.pb.edge{background:var(--accent);color:var(--accent-ink);border-color:transparent;font-weight:700}
 
-/* === Unit List === */
-.unit-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem;max-height:220px;overflow-y:auto;padding-right:4px}
-.unit-card{cursor:pointer;padding:13px 16px;border:3px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:space-between;transition:all .1s;box-shadow:var(--sh-sm)}
-.unit-card:hover{transform:translate(-2px,-2px);box-shadow:var(--sh)}
-.unit-card:active{transform:translate(2px,2px);box-shadow:none}
-.unit-card.selected{background:var(--yellow);color:#1a1a1a}
-.unit-name{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
-.unit-meta{font-size:11px;opacity:.6;margin-top:2px}
-.unit-count{font-size:10px;font-weight:700;padding:3px 9px;border:2px solid var(--border);background:var(--muted);white-space:nowrap;text-transform:uppercase}
-.unit-card.selected .unit-count{background:rgba(0,0,0,.12)}
+/* === Segmented switch === */
+.seg{display:flex;padding:3px;gap:3px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.seg label{flex:1;position:relative}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:flex;align-items:center;justify-content:center;min-height:40px;border-radius:9px;font-weight:600;font-size:15px;cursor:pointer;white-space:nowrap}
+.seg input:checked+span{background:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible+span{outline:3px solid var(--fg);outline-offset:1px}
 
-/* === Range Box === */
-.range-box{background:var(--card);border:3px solid var(--border);box-shadow:var(--sh-sm);padding:1.25rem;margin-bottom:1.25rem}
-.range-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;opacity:.55}
-.range-row{display:flex;align-items:center;gap:10px;margin-bottom:.5rem;flex-wrap:wrap}
-.range-label{font-size:13px;font-weight:600;min-width:36px}
-.range-input{width:72px;padding:8px 10px;border:3px solid var(--border);font-size:16px;font-family:inherit;font-weight:700;text-align:center;background:var(--bg);color:var(--fg)}
-.range-input:focus{outline:none;background:var(--yellow);color:#1a1a1a}
-.range-sep{font-size:13px;font-weight:600;opacity:.4}
-.range-count{font-size:12px;font-weight:700;color:var(--blue);min-width:70px;text-transform:uppercase}
-.range-vis{height:10px;border:3px solid var(--border);background:var(--muted);position:relative;overflow:hidden;margin-top:.75rem;margin-bottom:.5rem}
-.range-vis-fill{position:absolute;height:100%;background:var(--yellow);border-right:3px solid var(--border);transition:width .3s}
-.page-bubbles{display:flex;flex-wrap:wrap;gap:4px;margin-top:.75rem;max-height:120px;overflow-y:auto}
-.pb{width:34px;height:28px;border:2px solid var(--border);background:var(--bg);font-size:11px;font-weight:700;color:var(--fg);opacity:.45;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .1s;user-select:none}
-.pb:hover{opacity:1;background:var(--muted)}
-.pb.in-range{background:var(--muted);opacity:.85}
-.pb.range-start,.pb.range-end{background:var(--yellow);color:#1a1a1a;opacity:1}
-
-/* === Progress Bar === */
-.progress-bar{height:10px;border:3px solid var(--border);background:var(--muted);overflow:hidden;margin-bottom:1.5rem}
-.progress-fill{height:100%;background:var(--yellow);transition:width .35s}
-.score-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;opacity:.65;margin-bottom:.75rem}
-
-/* === Word Card === */
-.word-card{background:var(--card);border:3px solid var(--border);box-shadow:var(--sh);padding:2rem 1.5rem;text-align:center;font-size:clamp(20px,5vw,30px);font-weight:800;color:var(--fg);margin-bottom:1.5rem;min-height:88px;display:flex;align-items:center;justify-content:center;line-height:1.2;letter-spacing:-.02em;text-transform:uppercase}
-
-/* === Mode Grid === */
-.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
-.mode-card{cursor:pointer;padding:16px;border:3px solid var(--border);background:var(--card);transition:all .1s;box-shadow:var(--sh-sm);display:flex;flex-direction:column;gap:8px}
-.mode-card:hover{transform:translate(-2px,-2px);box-shadow:var(--sh)}
-.mode-card:active{transform:translate(2px,2px);box-shadow:none}
-.mode-icon{width:42px;height:42px;border:3px solid var(--border);background:var(--muted);display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
-.mode-card:hover .mode-icon{background:var(--yellow);color:#1a1a1a}
-.mode-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;color:var(--fg)}
-.mode-desc{font-size:11px;font-weight:500;opacity:.6;color:var(--fg)}
-
-/* === MCQ Options === */
-.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem}
-.opt{cursor:pointer;padding:16px 14px;border:3px solid var(--border);background:var(--card);color:var(--fg);font-size:13px;font-weight:700;text-align:left;transition:all .1s;line-height:1.4;width:100%;font-family:inherit;text-transform:uppercase;box-shadow:var(--sh-sm)}
-.opt:hover:not([disabled]){transform:translate(-2px,-2px);box-shadow:var(--sh);background:var(--yellow);color:#1a1a1a}
-.opt.correct{background:#ccffdd;color:#004422;border-color:var(--border)}
-html.dark .opt.correct{background:#003311;color:#88ffaa}
-.opt.wrong{background:#ffdddd;color:#880000;border-color:var(--border)}
-html.dark .opt.wrong{background:#330000;color:#ff9977}
-.opt.reveal{background:#ccffdd;color:#004422;opacity:.5}
-html.dark .opt.reveal{background:#003311;color:#88ffaa;opacity:.5}
-.opt[disabled]{cursor:default;pointer-events:none}
-
-/* === Flashcard === */
-.fc-answer{text-align:center;font-size:clamp(18px,4vw,26px);font-weight:800;color:var(--fg);margin-bottom:1.5rem;padding:1.5rem;border:3px solid var(--border);box-shadow:var(--sh-sm);background:var(--muted-light);text-transform:uppercase;letter-spacing:-.02em}
+/* === Round: word on top, answers in thumb reach === */
+.screen.round.active{display:flex;flex-direction:column;min-height:calc(100vh - 44px);min-height:calc(100dvh - 44px)}
+.round-bar{display:flex;align-items:center;gap:12px;margin-top:-8px}
+.quit{width:44px;height:44px;border:none;background:none;border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--muted);margin-left:-10px}
+.progress{flex:1;height:6px;border-radius:3px;background:var(--soft);overflow:hidden}
+.progress-fill{height:100%;width:0;background:var(--accent);transition:width .3s}
+.round-count{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:3.5em;text-align:right}
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center;padding:16px 0}
+.dir{font-size:13px;color:var(--muted);text-align:center;margin-bottom:10px}
+.word-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 20px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:clamp(24px,7vw,34px);font-weight:700;line-height:1.25;overflow-wrap:anywhere;transition:background-color .2s,border-color .2s}
+.word-card.flash-ok{background:var(--ok-bg);border-color:var(--ok)}
+.word-card.flash-bad{background:var(--bad-bg);border-color:var(--bad)}
+.fc-answer{font-size:clamp(18px,5vw,24px);font-weight:600;color:var(--muted);margin-top:14px;padding-top:14px;border-top:1px solid var(--line);width:100%}
+.answers{display:flex;flex-direction:column;gap:10px}
+.options{display:grid;gap:10px}
+@media (min-width:520px){.options{grid-template-columns:1fr 1fr}}
+.opt{min-height:56px;padding:12px 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);font-size:17px;font-weight:500;text-align:left;line-height:1.3;transition:background-color .15s,border-color .15s}
+.opt:disabled{cursor:default}
+.opt:disabled:not(.correct):not(.wrong){opacity:.5}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.feedback{min-height:24px;font-weight:600;text-align:center}
+.feedback.ok{color:var(--ok)}.feedback.bad{color:var(--bad)}
+.type-input{width:100%;min-height:56px;padding:0 16px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);font-size:18px}
+.type-input:focus-visible{outline:none;border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
+.audio-btn{width:96px;height:96px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.audio-btn .ic{width:40px;height:40px}
+.timer{color:var(--bad);font-weight:700}
 
 /* === Match === */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .match-col{display:flex;flex-direction:column;gap:8px}
-.match-item{padding:12px 14px;border:3px solid var(--border);background:var(--card);color:var(--fg);font-size:12px;font-weight:700;cursor:pointer;transition:all .1s;min-height:46px;display:flex;align-items:center;line-height:1.3;text-transform:uppercase;box-shadow:var(--sh-sm)}
-.match-item:hover{transform:translate(-1px,-1px);box-shadow:var(--sh);background:var(--yellow);color:#1a1a1a}
-.match-item.selected{background:var(--blue);color:#fff}
-.match-item.matched{background:#ccffdd;color:#004422;pointer-events:none}
-html.dark .match-item.matched{background:#003311;color:#88ffaa}
-.match-item.wrong-flash{background:#ffdddd;color:#880000}
-html.dark .match-item.wrong-flash{background:#330000;color:#ff9977}
+.match-item{min-height:56px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--card);font-size:15px;font-weight:500;text-align:left;line-height:1.25;overflow-wrap:anywhere;transition:background-color .15s,border-color .15s,opacity .2s}
+.match-item.selected{border-color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg);background:var(--soft)}
+.match-item.matched{background:var(--ok-bg);border-color:var(--ok);color:var(--ok);opacity:.7;cursor:default}
+.match-item.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
 
-/* === Type & Dictation === */
-.type-input{width:100%;padding:14px 16px;font-size:18px;font-weight:700;border:3px solid var(--border);background:var(--bg);color:var(--fg);margin-bottom:10px;font-family:inherit;box-shadow:var(--sh-sm);transition:all .1s}
-.type-input:focus{outline:none;background:var(--yellow);color:#1a1a1a;box-shadow:var(--sh)}
-.feedback{font-size:13px;font-weight:700;min-height:22px;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.03em}
-.audio-btn{width:80px;height:80px;border:3px solid var(--border);background:var(--blue);color:#fff;font-size:32px;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;cursor:pointer;box-shadow:var(--sh);transition:all .1s}
-.audio-btn:hover{transform:translate(-2px,-2px);box-shadow:var(--sh-lg)}
-.audio-btn:active{transform:translate(3px,3px);box-shadow:none}
+/* === Results & badges === */
+.result-card{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px 20px;margin-bottom:16px}
+.result-pct{font-size:64px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.result-title{font-size:20px;font-weight:700;margin:8px 0 4px}
+.review-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.review-row span:last-child{color:var(--muted);text-align:right}
+.badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:center;opacity:.45;filter:grayscale(1)}
+.badge-card.unlocked{opacity:1;filter:none;border-color:var(--accent)}
+.badge-icon{font-size:30px;margin-bottom:6px}
+.badge-title{font-weight:700;font-size:15px}
+.badge-desc{font-size:13px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,200%);background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:var(--r);font-weight:600;transition:transform .3s ease;z-index:20;white-space:nowrap}
+.toast.show{transform:translate(-50%,0)}
 
-/* === Timer === */
-.timer-text{font-size:44px;font-weight:800;color:var(--red);text-align:center;margin-bottom:10px;letter-spacing:-.04em}
+/* === Worksheet === */
+.sheet{background:#fff;color:#000;border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:16px;font-size:15px}
+.sheet-head{display:flex;justify-content:space-between;gap:12px;font-weight:600;margin-bottom:16px}
+.sheet h2{text-align:center;font-size:20px;margin-bottom:20px}
+.sheet h3{font-size:16px;margin:18px 0 8px}
+.sheet ul{list-style:none}
+.vocab-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;padding:7px 0}
+.vocab-row .line{flex:0 0 45%;height:1.2em;border-bottom:1px solid #000}
+.vocab-row .key{color:#17803d;font-weight:600;text-align:right}
+.sheet-foot{display:flex;justify-content:flex-end;gap:32px;font-weight:600;margin-top:28px}
 
-/* === Results === */
-.badge-pct{font-size:clamp(56px,12vw,88px);font-weight:800;text-align:center;margin:.75rem 0;letter-spacing:-.05em;line-height:1}
-.summary-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:2px solid var(--border);font-size:13px;font-weight:600}
+@media (hover:hover){
+  .btn:hover:not(:disabled),.row:hover,.opt:hover:not(:disabled),.match-item:hover:not(.matched):not(.selected),.pb:not(.edge):hover,.icon-btn:hover,.quit:hover{background-color:var(--soft)}
+  .btn-primary:hover:not(:disabled){background-color:var(--accent-hover)}
+  .link:hover,details.custom summary:hover{color:var(--fg)}
+}
 
-/* === Badge Grid === */
-.badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem}
-.badge-card{background:var(--card);border:3px solid var(--border);box-shadow:var(--sh-sm);padding:16px;text-align:center;opacity:.3;filter:grayscale(1);transition:all .3s}
-.badge-card.unlocked{opacity:1;filter:none;background:var(--yellow);color:#1a1a1a;box-shadow:var(--sh)}
-.badge-icon{font-size:30px;margin-bottom:8px}
-.badge-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
-.badge-desc{font-size:11px;opacity:.65}
-
-/* === Toast === */
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--fg);color:var(--bg);padding:14px 24px;border:3px solid var(--border);box-shadow:var(--sh);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;transition:transform .4s cubic-bezier(.175,.885,.32,1.275);z-index:100;display:flex;align-items:center;gap:8px}
-.toast.show{transform:translateX(-50%) translateY(0)}
-
-/* === Misc === */
-.dir-select{width:100%;padding:10px 12px;border:3px solid var(--border);background:var(--bg);color:var(--fg);font-size:13px;font-family:inherit;font-weight:700;text-transform:uppercase;margin-bottom:1.5rem;cursor:pointer;box-shadow:var(--sh-sm)}
-.dir-select:focus{outline:none;background:var(--yellow);color:#1a1a1a}
-::-webkit-scrollbar{width:10px}
-::-webkit-scrollbar-track{background:var(--bg);border-left:3px solid var(--border)}
-::-webkit-scrollbar-thumb{background:var(--border)}
+@media print{
+  .site-header,.toast,.screen:not(#test-creator-screen),#test-creator-screen > :not(#test-output){display:none!important}
+  body{background:#fff}
+  .wrap{max-width:none;padding:0}
+  .sheet{border:none;padding:0;margin:0;font-size:12pt}
+  .vocab-row{padding:10px 0;break-inside:avoid}
+  .vocab-row .key{color:#2e7d32}
+  @page{margin:1.5cm}
+}
 </style>
 <script>
-if(localStorage.getItem('theme')==='dark'||(!'theme' in localStorage&&window.matchMedia('(prefers-color-scheme: dark)').matches)){
+if(localStorage.getItem('theme')==='dark'||(!('theme' in localStorage)&&window.matchMedia('(prefers-color-scheme: dark)').matches)){
   document.documentElement.classList.add('dark');
 }
 function toggleTheme(){
   const isDark=document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme',isDark?'dark':'light');
-  document.getElementById('theme-icon').textContent=isDark?'light_mode':'dark_mode';
+  syncThemeIcon();
+}
+function syncThemeIcon(){
+  document.getElementById('theme-icon').setAttribute('href',document.documentElement.classList.contains('dark')?'#i-sun':'#i-moon');
 }
 </script>
 </head>
 <body>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.2.3 1.5 1.3 2.7 2.5 2.7z"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.7V17c0 .6-.5 1-1 1.2C7.9 18.8 7 20.2 7 22M14 14.7V17c0 .6.5 1 1 1.2 1.1.6 2 2 2 3.8M18 2H6v7a6 6 0 0 0 12 0V2z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M18 12h.01M7 15h10"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-timer" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 2h4"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4M3 11v-1a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+</svg>
+
 <header class="site-header">
-  <div class="logo">VOCABULARY TRAINER</div>
-  <div class="header-btns">
-    <button class="icon-btn" onclick="toggleTheme()" title="Toggle dark mode">
-      <span class="material-symbols-outlined" id="theme-icon">dark_mode</span>
-    </button>
-  </div>
+  <div class="logo">Vocab Trainer</div>
+  <button class="icon-btn" onclick="show('badge-screen')" aria-label="Streak and badges">
+    <svg class="ic"><use href="#i-flame"/></svg><span id="streak-count">0</span>
+  </button>
+  <button class="icon-btn" onclick="show('badge-screen')" aria-label="Badges">
+    <svg class="ic"><use href="#i-trophy"/></svg>
+  </button>
+  <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <svg class="ic"><use id="theme-icon" href="#i-moon"/></svg>
+  </button>
 </header>
 
 <main>
@@ -213,243 +214,245 @@ function toggleTheme(){
 
 <!-- ── Select Screen ── -->
 <div id="select-screen" class="screen active">
-  <div class="top-bar">
-    <div>
-      <div class="page-title">Selection Hub</div>
-      <div class="page-sub">Choose your training mode</div>
-    </div>
-    <div class="top-bar-right">
-      <div class="streak-box">
-        <span class="material-symbols-outlined" style="font-size:20px">local_fire_department</span>
-        <div class="streak-num" id="streak-count">0</div>
-        <div class="streak-label">Streak</div>
-      </div>
-      <button class="icon-btn" onclick="show('badge-screen')" title="Achievements" style="width:44px;height:44px">
-        <span class="material-symbols-outlined">emoji_events</span>
-      </button>
-    </div>
-  </div>
-
+  <h1>Choose a unit</h1>
+  <p class="sub">Tap a unit to start practising.</p>
   <div id="weak-alert-container"></div>
-
-  <div class="section-label">Select Unit</div>
-  <div class="unit-list" id="unit-list"></div>
-
-  <div class="range-box">
-    <div class="range-title">Page Range</div>
+  <div class="list" id="unit-list"></div>
+  <details class="custom">
+    <summary>Custom pages</summary>
     <div class="range-row">
-      <span class="range-label">From</span>
-      <input class="range-input" id="range-from" type="number" min="6" max="184" value="35">
-      <span class="range-sep">to</span>
-      <input class="range-input" id="range-to" type="number" min="6" max="184" value="46">
-      <span class="range-count" id="range-count"></span>
+      <input class="num" id="range-from" type="number" inputmode="numeric" aria-label="First page">
+      <span class="hint">to</span>
+      <input class="num" id="range-to" type="number" inputmode="numeric" aria-label="Last page">
+      <span class="count" id="range-count"></span>
     </div>
-    <div class="range-vis"><div class="range-vis-fill" id="range-vis-fill"></div></div>
-    <div class="page-bubbles" id="page-bubbles"></div>
-  </div>
-
-  <button class="btn btn-red btn-lg" id="start-btn" onclick="goToModes()">
-    <span class="material-symbols-outlined">play_arrow</span>
-    Train Now
-  </button>
+    <button class="btn btn-primary btn-block" id="start-btn" onclick="startCustom()">Practise these pages</button>
+    <p class="hint" id="bubble-hint" style="margin-top:14px"></p>
+    <div class="bubbles" id="page-bubbles"></div>
+  </details>
 </div>
 
 <!-- ── Badge Screen ── -->
 <div id="badge-screen" class="screen">
-  <button class="back-link" onclick="show('select-screen')">← Back</button>
-  <div class="page-title" style="font-size:clamp(26px,6vw,44px)">Trophy Room</div>
-  <p class="sub">Unlock badges by hitting milestones.</p>
+  <button class="link" onclick="show('select-screen')">← Back</button>
+  <h1>Trophy room</h1>
+  <p class="sub" id="streak-text"></p>
   <div class="badge-grid" id="badge-container"></div>
 </div>
 
 <!-- ── Mode Screen ── -->
 <div id="mode-screen" class="screen">
-  <button class="back-link" onclick="show('select-screen')">← Change selection</button>
-  <div class="page-title" style="font-size:clamp(26px,6vw,44px)">Select Mode</div>
+  <button class="link" onclick="show('select-screen')">← Units</button>
+  <h1 id="mode-title"></h1>
   <p class="sub" id="mode-sub"></p>
 
-  <div class="mode-grid">
-    <div class="mode-card" onclick="startMode('mcq')">
-      <div class="mode-icon"><span class="material-symbols-outlined">list_alt</span></div>
-      <div class="mode-title">Multiple Choice</div>
-      <div class="mode-desc">Pick the correct translation</div>
-    </div>
-    <div class="mode-card" onclick="startMode('flashcard')">
-      <div class="mode-icon"><span class="material-symbols-outlined">style</span></div>
-      <div class="mode-title">Flashcards</div>
-      <div class="mode-desc">Reveal and rate yourself</div>
-    </div>
-    <div class="mode-card" onclick="startMode('match')">
-      <div class="mode-icon"><span class="material-symbols-outlined">hub</span></div>
-      <div class="mode-title">Match Pairs</div>
-      <div class="mode-desc">Connect 6 pairs at once</div>
-    </div>
-    <div class="mode-card" onclick="startMode('type')">
-      <div class="mode-icon"><span class="material-symbols-outlined">keyboard</span></div>
-      <div class="mode-title">Type It</div>
-      <div class="mode-desc">Type from memory</div>
-    </div>
-    <div class="mode-card" onclick="startMode('dictation')">
-      <div class="mode-icon"><span class="material-symbols-outlined">mic</span></div>
-      <div class="mode-title">Dictation</div>
-      <div class="mode-desc">Listen and type</div>
-    </div>
-    <div class="mode-card" onclick="startMode('timeattack')" style="background:var(--yellow);color:#1a1a1a;grid-column:span 2;flex-direction:row;align-items:center;justify-content:space-between;position:relative;overflow:hidden;">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div class="mode-icon" style="background:var(--card)"><span class="material-symbols-outlined">timer</span></div>
-        <div>
-          <div class="mode-title" style="color:#1a1a1a;font-size:15px">Time Attack</div>
-          <div class="mode-desc" style="color:#1a1a1a">60 seconds. How many can you get?</div>
-        </div>
-      </div>
-      <div style="position:absolute;top:-6px;right:-6px;background:var(--red);color:#fff;border:3px solid var(--border);padding:3px 10px;font-size:9px;font-weight:800;text-transform:uppercase;transform:rotate(6deg)">Hardcore</div>
-    </div>
-    <div class="mode-card" onclick="showTestCreator()" style="grid-column:span 2;flex-direction:row;align-items:center;gap:12px">
-      <div class="mode-icon"><span class="material-symbols-outlined">print</span></div>
-      <div>
-        <div class="mode-title">Create a Worksheet</div>
-        <div class="mode-desc">Generate a printable test</div>
-      </div>
-    </div>
+  <div class="seg" role="radiogroup" aria-label="Direction">
+    <label><input type="radio" name="dir" value="en-de" checked><span>EN → DE</span></label>
+    <label><input type="radio" name="dir" value="de-en"><span>DE → EN</span></label>
+    <label><input type="radio" name="dir" value="mixed"><span>Mixed</span></label>
+  </div>
+  <div class="label">Words per round</div>
+  <div class="seg" role="radiogroup" aria-label="Words per round">
+    <label><input type="radio" name="len" value="10"><span>10</span></label>
+    <label><input type="radio" name="len" value="20" checked><span>20</span></label>
+    <label><input type="radio" name="len" value="all"><span>All</span></label>
   </div>
 
-  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;opacity:.55;margin-bottom:6px">Direction</div>
-  <select id="dir-select" class="dir-select">
-    <option value="random">Random Direction</option>
-    <option value="en-de">English → German</option>
-    <option value="de-en">Deutsch → Englisch</option>
-  </select>
+  <div class="label">Mode</div>
+  <div class="list">
+    <button class="row" onclick="startMode('mcq')">
+      <span class="mode-ic"><svg class="ic"><use href="#i-list"/></svg></span>
+      <span class="row-main"><span class="row-title">Multiple choice</span><span class="row-meta">Pick the correct translation</span></span>
+    </button>
+    <button class="row" onclick="startMode('flashcard')">
+      <span class="mode-ic"><svg class="ic"><use href="#i-cards"/></svg></span>
+      <span class="row-main"><span class="row-title">Flashcards</span><span class="row-meta">Reveal and rate yourself</span></span>
+    </button>
+    <button class="row" onclick="startMode('match')">
+      <span class="mode-ic"><svg class="ic"><use href="#i-link"/></svg></span>
+      <span class="row-main"><span class="row-title">Match pairs</span><span class="row-meta">Connect 6 pairs at once</span></span>
+    </button>
+    <button class="row" onclick="startMode('type')">
+      <span class="mode-ic"><svg class="ic"><use href="#i-keyboard"/></svg></span>
+      <span class="row-main"><span class="row-title">Type it</span><span class="row-meta">Type from memory</span></span>
+    </button>
+    <button class="row" id="dictation-row" onclick="startMode('dictation')">
+      <span class="mode-ic"><svg class="ic"><use href="#i-volume"/></svg></span>
+      <span class="row-main"><span class="row-title">Dictation</span><span class="row-meta">Listen and write the English word</span></span>
+    </button>
+    <button class="row" onclick="startMode('timeattack')">
+      <span class="mode-ic"><svg class="ic"><use href="#i-timer"/></svg></span>
+      <span class="row-main"><span class="row-title">Time attack</span><span class="row-meta">60 seconds. How many can you get?</span></span>
+    </button>
+    <button class="row" onclick="showTestCreator()">
+      <span class="mode-ic"><svg class="ic"><use href="#i-print"/></svg></span>
+      <span class="row-main"><span class="row-title">Worksheet</span><span class="row-meta">Make a printable test</span></span>
+    </button>
+  </div>
 </div>
 
-<!-- ── MCQ Screen ── -->
-<div id="mcq-screen" class="screen">
-  <div id="ta-timer-container" style="display:none"><div class="timer-text" id="ta-timer">60s</div></div>
-  <div class="score-row"><span id="mcq-label"></span><span id="mcq-score"></span></div>
-  <div class="progress-bar" id="mcq-prog-container"><div class="progress-fill" id="mcq-progress"></div></div>
-  <div class="pill" id="mcq-dir" style="margin-bottom:1rem"></div>
-  <div class="word-card" id="mcq-word"></div>
-  <div class="options-grid" id="mcq-options"></div>
-  <button class="btn btn-sm" onclick="quitMode()" style="display:block;margin:0 auto">Quit</button>
+<!-- ── MCQ Screen (also Time Attack) ── -->
+<div id="mcq-screen" class="screen round">
+  <div class="round-bar">
+    <button class="quit" onclick="quitMode()" aria-label="Quit"><svg class="ic"><use href="#i-x"/></svg></button>
+    <div class="progress"><div class="progress-fill" id="mcq-progress"></div></div>
+    <span class="round-count" id="mcq-label"></span>
+  </div>
+  <div class="stage">
+    <div class="dir" id="mcq-dir"></div>
+    <div class="word-card" id="mcq-word"></div>
+  </div>
+  <div class="answers">
+    <div class="options" id="mcq-options"></div>
+    <button class="btn btn-primary btn-block" id="mcq-next" onclick="mcqNext()" hidden>Next</button>
+  </div>
 </div>
 
 <!-- ── Flashcard Screen ── -->
-<div id="flashcard-screen" class="screen">
-  <div class="score-row"><span id="fc-label"></span><span id="fc-score"></span></div>
-  <div class="progress-bar"><div class="progress-fill" id="fc-progress"></div></div>
-  <div class="pill" id="fc-dir" style="margin-bottom:1rem"></div>
-  <div class="word-card" id="fc-word"></div>
-  <div class="fc-answer" id="fc-translation" style="display:none"></div>
-  <div id="fc-reveal-btn" style="text-align:center;margin-bottom:1rem">
-    <button class="btn btn-primary" onclick="fcReveal()">Reveal Translation</button>
+<div id="flashcard-screen" class="screen round">
+  <div class="round-bar">
+    <button class="quit" onclick="quitMode()" aria-label="Quit"><svg class="ic"><use href="#i-x"/></svg></button>
+    <div class="progress"><div class="progress-fill" id="fc-progress"></div></div>
+    <span class="round-count" id="fc-label"></span>
   </div>
-  <div id="fc-rate-btns" style="display:none;gap:10px;justify-content:center;margin-bottom:1.5rem">
-    <button class="btn" style="color:var(--red)" onclick="fcRate(false)">Didn't Know</button>
-    <button class="btn" style="background:#ccffdd;color:#004422" onclick="fcRate(true)">Got It</button>
+  <div class="stage">
+    <div class="dir" id="fc-dir"></div>
+    <div class="word-card"><div id="fc-word"></div><div class="fc-answer" id="fc-translation" hidden></div></div>
   </div>
-  <button class="btn btn-sm" onclick="quitMode()" style="display:block;margin:0 auto">Quit</button>
+  <div class="answers">
+    <button class="btn btn-primary btn-block" id="fc-reveal-btn" onclick="fcReveal()">Show translation</button>
+    <div class="btn-row" id="fc-rate-btns" hidden>
+      <button class="btn" onclick="fcRate(false)">Didn't know</button>
+      <button class="btn btn-primary" onclick="fcRate(true)">Got it</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── Match Screen ── -->
-<div id="match-screen" class="screen">
-  <div class="score-row"><span id="match-label">Match the pairs</span><span id="match-score"></span></div>
-  <div class="progress-bar"><div class="progress-fill" id="match-progress"></div></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.5rem">
-    <div class="match-col" id="match-left"></div>
-    <div class="match-col" id="match-right"></div>
+<div id="match-screen" class="screen round">
+  <div class="round-bar">
+    <button class="quit" onclick="quitMode()" aria-label="Quit"><svg class="ic"><use href="#i-x"/></svg></button>
+    <div class="progress"><div class="progress-fill" id="match-progress"></div></div>
+    <span class="round-count" id="match-label"></span>
   </div>
-  <button class="btn btn-sm" onclick="quitMode()" style="display:block;margin:0 auto">Quit</button>
+  <div class="stage">
+    <div class="dir">Tap a word, then its translation</div>
+    <div class="match">
+      <div class="match-col" id="match-left"></div>
+      <div class="match-col" id="match-right"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ── Type Screen (also Dictation) ── -->
-<div id="type-screen" class="screen">
-  <div class="score-row"><span id="type-label"></span><span id="type-score"></span></div>
-  <div class="progress-bar"><div class="progress-fill" id="type-progress"></div></div>
-  <div class="pill" id="type-dir" style="margin-bottom:1rem"></div>
-  <div class="word-card" id="type-word"></div>
-  <button class="audio-btn" id="dictation-btn" style="display:none" onclick="playCurrentWord()">
-    <span class="material-symbols-outlined" style="font-size:36px">volume_up</span>
-  </button>
-  <input class="type-input" id="type-input" placeholder="Type the translation…" autocomplete="off" spellcheck="false">
-  <div class="feedback" id="type-feedback"></div>
-  <div style="display:flex;gap:10px;margin-bottom:1.5rem">
-    <button class="btn btn-primary" onclick="typeCheck()" style="flex:1">Check</button>
-    <button class="btn" onclick="typeSkip()" style="opacity:.6">Skip</button>
+<div id="type-screen" class="screen round">
+  <div class="round-bar">
+    <button class="quit" onclick="quitMode()" aria-label="Quit"><svg class="ic"><use href="#i-x"/></svg></button>
+    <div class="progress"><div class="progress-fill" id="type-progress"></div></div>
+    <span class="round-count" id="type-label"></span>
   </div>
-  <button class="btn btn-sm" onclick="quitMode()" style="display:block;margin:0 auto">Quit</button>
+  <div class="stage">
+    <div class="dir" id="type-dir"></div>
+    <button class="audio-btn" id="dictation-btn" onclick="playCurrentWord()" aria-label="Play the word again" hidden>
+      <svg class="ic"><use href="#i-volume"/></svg>
+    </button>
+    <div class="word-card" id="type-word"></div>
+  </div>
+  <div class="answers">
+    <div class="feedback" id="type-feedback" aria-live="polite"></div>
+    <input class="type-input" id="type-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go" aria-label="Your answer">
+    <div class="btn-row" id="type-btns">
+      <button class="btn" onclick="typeSkip()">Show answer</button>
+      <button class="btn btn-primary" onclick="typeCheck()">Check</button>
+    </div>
+    <button class="btn btn-primary btn-block" id="type-next" onclick="typeNext()" hidden>Next</button>
+  </div>
 </div>
 
 <!-- ── Result Screen ── -->
 <div id="result-screen" class="screen">
-  <div style="text-align:center;margin-bottom:1rem;border:3px solid var(--border);box-shadow:var(--sh);background:var(--card);padding:2rem 1.5rem">
-    <div class="badge-pct" id="result-pct"></div>
-    <div style="font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:.25rem" id="result-title"></div>
-    <div style="font-size:12px;font-weight:600;opacity:.55;text-transform:uppercase;letter-spacing:.04em" id="result-sub"></div>
+  <div class="result-card">
+    <div class="result-pct" id="result-pct"></div>
+    <div class="result-title" id="result-title"></div>
+    <div class="hint" id="result-sub"></div>
   </div>
-  <div id="result-wrong" style="margin:1.5rem 0"></div>
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="retryMode()">Play Again</button>
-    <button class="btn" onclick="show('select-screen')">Start Menu</button>
+  <div class="btn-row">
+    <button class="btn" onclick="show('select-screen')">Units</button>
+    <button class="btn btn-primary" onclick="retryMode()">Play again</button>
   </div>
+  <div id="result-wrong"></div>
 </div>
 
 <!-- ── Test Creator Screen ── -->
 <div id="test-creator-screen" class="screen">
-  <button class="back-link" onclick="show('mode-screen')">← Back to modes</button>
-  <div class="page-title" style="font-size:clamp(26px,6vw,44px)">Worksheet</div>
-  <p class="sub">Generate a printable test from your selected vocabulary.</p>
-  <div class="range-box">
-    <div class="range-row">
-      <span class="range-label">Questions:</span>
-      <input class="range-input" id="test-q-count" type="number" min="5" max="100" value="20" style="width:80px">
-    </div>
+  <button class="link" onclick="show('mode-screen')">← Modes</button>
+  <h1>Worksheet</h1>
+  <p class="sub">A printable test from this selection, in the direction you picked.</p>
+  <div class="range-row">
+    <label class="hint" for="test-class">Class</label>
+    <input class="num" id="test-class" style="width:120px" placeholder="e.g. 2BFS1">
+    <label class="hint" for="test-q-count">Questions</label>
+    <input class="num" id="test-q-count" type="number" inputmode="numeric" min="1" value="20">
   </div>
-  <div style="display:flex;gap:10px;margin-bottom:1.5rem">
-    <button class="btn btn-primary" onclick="generateTest(false)" style="flex:1">Generate Test</button>
-    <button class="btn" onclick="generateTest(true)" style="flex:1">Answer Key</button>
+  <div class="btn-row">
+    <button class="btn" onclick="generateTest(false)">New test</button>
+    <button class="btn" onclick="generateTest(true)">Answer key</button>
   </div>
-  <div id="test-output" style="background:var(--card);border:3px solid var(--border);box-shadow:var(--sh-sm);padding:20px;display:none;max-height:400px;overflow-y:auto;font-size:14px;text-align:left;color:var(--fg)"></div>
-  <button class="btn btn-primary" id="print-test-btn" onclick="printTest()" style="display:none;width:100%;margin-top:10px;padding:14px;font-size:15px">
-    Print Test
-  </button>
+  <div class="sheet" id="test-output" hidden></div>
+  <button class="btn btn-primary btn-block" id="print-test-btn" onclick="window.print()" style="margin-top:12px" hidden>Print</button>
 </div>
 
-<div id="toast" class="toast">🏆 Badge Unlocked: <span id="toast-msg"></span></div>
+<div id="toast" class="toast" role="status">🏆 Badge unlocked: <span id="toast-msg"></span></div>
 
 </div><!-- .wrap -->
 </main>
 
 <script src="db.js"></script>
+<script src="answers.js"></script>
 <script>
 // ── App State ──
-let activeFrom=35, activeTo=46, activeDeck=[], dir='en-de', lastMode='mcq', isWeakMode=false;
-let current=0, score=0, wrong=[];
-let matchSelected=null, matchPairs=[], matchDone=0;
-let timeLimit=60, timeInterval=null;
+const ALL_WORDS = Object.values(VOCAB_BY_PAGE).flat();
+const PAGES = Object.keys(VOCAB_BY_PAGE).map(Number).sort((a,b)=>a-b);
+const ROUND_SCREENS = ['mcq-screen','flashcard-screen','match-screen','type-screen'];
+let activeFrom=35, activeTo=46, pickingEnd=false, isWeakMode=false;
+let sourceWords=[], poolWords=[], deck=[], dirs=[], lastMode='mcq';
+let current=0, score=0, wrong=[], answered=false, roundId=0;
+let matchSelected=null, matchPairs=[], matchDone=0, matchMissed=new Set();
+let timeLeft=60, timeInterval=null;
 
 // ── Gamification State ──
-let streak=0, lastPlayed="", badges={}, weakWords=[];
+let streak=0, lastPlayed="", badges={}, weakWords=[], seenWords={};
 const BADGE_DEFS = {
   'first_blood': { icon:'🩸', title:'First Step',   desc:'Complete your first quiz.' },
   'early_bird':  { icon:'🌅', title:'Early Bird',   desc:'Study before 8:00 AM.' },
   'night_owl':   { icon:'🦉', title:'Night Owl',    desc:'Study after 10:00 PM.' },
-  'flawless':    { icon:'✨', title:'Flawless',     desc:'100% on a >10 word quiz.' },
+  'flawless':    { icon:'✨', title:'Flawless',     desc:'100% on a 10+ word quiz.' },
   'speed_demon': { icon:'⚡', title:'Speed Demon',  desc:'Score 15+ in Time Attack.' },
   'dedicated':   { icon:'🔥', title:'Dedicated',    desc:'Reach a 3-day streak.' }
 };
 
 // ── Init ──
 function initApp(){
-  if('speechSynthesis' in window){
-    speechSynthesis.getVoices();
-    speechSynthesis.onvoiceschanged = () => { window.voicesReady = true; };
-  }
-  streak    = parseInt(localStorage.getItem('vocab_streak') || '0');
+  if('speechSynthesis' in window) speechSynthesis.getVoices();
+  else document.getElementById('dictation-row').hidden = true;
+  streak     = parseInt(localStorage.getItem('vocab_streak') || '0');
   lastPlayed = localStorage.getItem('vocab_last_played') || '';
-  badges    = JSON.parse(localStorage.getItem('vocab_badges') || '{}');
-  weakWords = JSON.parse(localStorage.getItem('vocab_weak_words') || '[]');
-  // Sync theme icon
-  document.getElementById('theme-icon').textContent =
-    document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
+  badges     = JSON.parse(localStorage.getItem('vocab_badges') || '{}');
+  seenWords  = JSON.parse(localStorage.getItem('vocab_seen') || '{}');
+  weakWords  = loadWeakWords();
+  // Remember direction and round length between visits
+  ['dir','len'].forEach(name => {
+    const saved = document.querySelector(`input[name=${name}][value="${localStorage.getItem('vocab_'+name)}"]`);
+    if(saved) saved.checked = true;
+    document.querySelectorAll(`input[name=${name}]`).forEach(r => r.onchange = () => localStorage.setItem('vocab_'+name, r.value));
+  });
+  const cls = document.getElementById('test-class');
+  cls.value = localStorage.getItem('vocab_class') || '';
+  cls.oninput = () => localStorage.setItem('vocab_class', cls.value);
+  document.getElementById('type-input').onkeydown = e => {
+    if(e.key === 'Enter'){ e.preventDefault(); answered ? typeNext() : typeCheck(); }
+  };
+  syncThemeIcon();
   updateStreakUI();
   renderBadges();
   renderWeakAlert();
@@ -469,7 +472,10 @@ function updateStreakData(){
     if(streak >= 3) awardBadge('dedicated');
   }
 }
-function updateStreakUI(){ document.getElementById('streak-count').textContent = streak; }
+function updateStreakUI(){
+  document.getElementById('streak-count').textContent = streak;
+  document.getElementById('streak-text').textContent = streak === 1 ? 'Streak: 1 day.' : `Streak: ${streak} days.`;
+}
 
 function awardBadge(id){
   if(!badges[id]){
@@ -484,199 +490,210 @@ function awardBadge(id){
 }
 
 function renderBadges(){
-  const c = document.getElementById('badge-container');
-  c.innerHTML = '';
-  for(const [id, def] of Object.entries(BADGE_DEFS)){
-    c.innerHTML += `<div class="badge-card ${badges[id]?'unlocked':''}">
+  document.getElementById('badge-container').innerHTML = Object.entries(BADGE_DEFS).map(([id, def]) =>
+    `<div class="badge-card ${badges[id]?'unlocked':''}">
       <div class="badge-icon">${def.icon}</div>
       <div class="badge-title">${def.title}</div>
       <div class="badge-desc">${def.desc}</div>
-    </div>`;
-  }
+    </div>`).join('');
 }
 
 // ── Spaced Repetition ──
-function handleAnswerEvaluation(qText, aText, isCorrect){
-  const idx = weakWords.findIndex(w => w.q === qText && w.a === aText);
+// Weak words are stored as the original [en, de] pair, whatever direction they were asked in.
+function loadWeakWords(){
+  const saved = JSON.parse(localStorage.getItem('vocab_weak_words') || '[]');
+  const out = [];
+  for(const w of saved){
+    // Older versions saved {q, a} in the asked direction
+    const pair = w.en ? [w.en, w.de] : ALL_WORDS.find(x => (x[0]===w.q && x[1]===w.a) || (x[1]===w.q && x[0]===w.a));
+    if(pair && !out.some(o => o.en===pair[0] && o.de===pair[1])) out.push({en:pair[0], de:pair[1], streak:w.streak || 0});
+  }
+  return out;
+}
+
+function recordAnswer(w, isCorrect){
+  seenWords[key(w)] = 1;
+  localStorage.setItem('vocab_seen', JSON.stringify(seenWords));
+  const idx = weakWords.findIndex(x => x.en === w[0] && x.de === w[1]);
   if(!isCorrect){
     if(idx >= 0) weakWords[idx].streak = 0;
-    else weakWords.push({q: qText, a: aText, streak: 0});
-  } else if(idx >= 0){
-    weakWords[idx].streak++;
-    if(weakWords[idx].streak >= 2) weakWords.splice(idx, 1);
+    else weakWords.push({en:w[0], de:w[1], streak:0});
+  } else if(idx >= 0 && ++weakWords[idx].streak >= 2){
+    weakWords.splice(idx, 1);
   }
   localStorage.setItem('vocab_weak_words', JSON.stringify(weakWords));
 }
 
+// Round order: weak words first, then words not seen yet, then the rest.
+function buildRound(words){
+  const weak = new Set(weakWords.map(w => key([w.en, w.de])));
+  const rank = w => weak.has(key(w)) ? 0 : seenWords[key(w)] ? 2 : 1;
+  const ordered = shuffle(words).sort((x, y) => rank(x) - rank(y));
+  const len = document.querySelector('input[name=len]:checked').value;
+  return shuffle(len === 'all' ? ordered : ordered.slice(0, +len));
+}
+
 function renderWeakAlert(){
-  const c = document.getElementById('weak-alert-container');
-  c.innerHTML = weakWords.length >= 1
-    ? `<div class="weak-word-alert" onclick="startWeakMode()">
-        <span>⚠ ${weakWords.length} weak word${weakWords.length>1?'s':''} to review</span>
-        <strong>Practice →</strong>
-       </div>`
+  const n = weakWords.length;
+  document.getElementById('weak-alert-container').innerHTML = n
+    ? `<button class="row alert" onclick="startWeakMode()">
+        <span class="mode-ic"><svg class="ic"><use href="#i-repeat"/></svg></span>
+        <span class="row-main"><span class="row-title">Review ${n} weak word${n>1?'s':''}</span><span class="row-meta">Words you got wrong recently</span></span>
+        <svg class="ic chev"><use href="#i-chev"/></svg>
+       </button>`
     : '';
 }
 
 function startWeakMode(){
   isWeakMode = true;
-  activeDeck = shuffle(weakWords.map(w => [w.q, w.a]));
-  lastMode = 'mcq';
-  dir = 'en-de';
-  startMode('mcq');
+  sourceWords = weakWords.map(w => [w.en, w.de]);
+  // Wrong options come from the selected unit as well, so there are always enough
+  poolWords = dedupe([...sourceWords, ...getWords(activeFrom, activeTo)]);
+  document.getElementById('mode-title').textContent = 'Weak words';
+  document.getElementById('mode-sub').textContent = sourceWords.length + ' word' + (sourceWords.length>1?'s':'') + ' to review';
+  show('mode-screen');
 }
 
 // ── Utilities ──
 function show(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+  document.body.classList.toggle('in-round', ROUND_SCREENS.includes(id));
+  if(id === 'select-screen') renderWeakAlert();
   window.scrollTo(0,0);
 }
 function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]}return b;}
 function setProgress(id,n,t){document.getElementById(id).style.width=Math.round((n/t)*100)+'%';}
-function dirLabel(){return dir==='en-de'?'English → German':'Deutsch → Englisch';}
-function q(i){return dir==='en-de'?activeDeck[i][0]:activeDeck[i][1];}
-function a(i){return dir==='en-de'?activeDeck[i][1]:activeDeck[i][0];}
-function norm(s){return s.toLowerCase().replace(/[^a-z0-9äöüß\s]/g,'').trim();}
-function quitMode(){ clearInterval(timeInterval); show('select-screen'); renderWeakAlert(); }
+function key(w){ return w[0] + '|' + w[1]; }
+function dedupe(words){ const m = new Map(); words.forEach(w => m.has(w[0]) || m.set(w[0], w)); return [...m.values()]; }
+function esc(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]); }
+function q(i){ return dirs[i] === 'en-de' ? deck[i][0] : deck[i][1]; }
+function a(i){ return dirs[i] === 'en-de' ? deck[i][1] : deck[i][0]; }
+function dirLabel(i){
+  if(lastMode === 'dictation') return 'Listen and type the English word';
+  return dirs[i] === 'en-de' ? 'English → German' : 'German → English';
+}
+// setTimeout that does nothing if the student has quit or already moved on
+function later(fn, ms){ const id = roundId, at = current; setTimeout(() => { if(id === roundId && at === current) fn(); }, ms); }
+function flash(el, ok){
+  el.classList.remove('flash-ok','flash-bad'); void el.offsetWidth;
+  el.classList.add(ok ? 'flash-ok' : 'flash-bad');
+  if(navigator.vibrate) navigator.vibrate(ok ? 30 : [60, 50, 60]);
+}
+function quitMode(){
+  clearInterval(timeInterval); roundId++;
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+  show('select-screen');
+}
 
 function getWords(from,to){
   let w=[];
   for(let p=from;p<=to;p++){if(VOCAB_BY_PAGE[p])w=w.concat(VOCAB_BY_PAGE[p]);}
   return w;
 }
-function countWords(from,to){
-  let n=0;
-  for(let p=from;p<=to;p++){if(VOCAB_BY_PAGE[p])n+=VOCAB_BY_PAGE[p].length;}
-  return n;
-}
 
 // ── Selection Screen ──
 function buildSelection(){
   const list = document.getElementById('unit-list');
-  list.innerHTML = '';
-  UNITS.forEach((u, idx) => {
-    const n = u.from ? countWords(u.from, u.to) : '—';
-    const card = document.createElement('div');
-    card.className = 'unit-card';
-    card.innerHTML = `<div><div class="unit-name">${u.name}</div><div class="unit-meta">${u.desc}${u.from?' · pp.'+u.from+'–'+u.to:''}</div></div><span class="unit-count">${n} words</span>`;
-    card.onclick = () => selectUnit(idx);
-    list.appendChild(card);
+  UNITS.filter(u => u.from).forEach(u => {
+    const b = document.createElement('button');
+    b.className = 'row';
+    b.innerHTML = `<span class="row-main"><span class="row-title">${u.name}</span><span class="row-meta">${u.desc} · pp. ${u.from}–${u.to}</span></span><span class="count">${dedupe(getWords(u.from, u.to)).length} words</span><svg class="ic chev"><use href="#i-chev"/></svg>`;
+    b.onclick = () => openSelection(u.from, u.to, u.name);
+    list.appendChild(b);
   });
-  buildBubbles();
-  updateCount();
-
   const fi = document.getElementById('range-from');
   const ti = document.getElementById('range-to');
-  fi.oninput = () => {
-    activeFrom = Math.max(6, Math.min(184, parseInt(fi.value)||6));
-    if(activeFrom > activeTo){ activeTo = activeFrom; ti.value = activeTo; }
-    fi.value = activeFrom;
-    deselectUnits(); selectCustom(); buildBubbles(); updateCount();
-  };
-  ti.oninput = () => {
-    activeTo = Math.max(6, Math.min(184, parseInt(ti.value)||6));
-    if(activeTo < activeFrom){ activeFrom = activeTo; fi.value = activeFrom; }
-    ti.value = activeTo;
-    deselectUnits(); selectCustom(); buildBubbles(); updateCount();
-  };
-
-  selectUnit(3);
+  fi.onchange = ti.onchange = () => { pickingEnd = false; setRange(parseInt(fi.value), parseInt(ti.value)); };
+  setRange(activeFrom, activeTo);
 }
 
-function deselectUnits(){ document.querySelectorAll('.unit-card').forEach(c=>c.classList.remove('selected')); }
-function selectCustom(){ document.querySelectorAll('.unit-card')[UNITS.length-1].classList.add('selected'); }
-
-function selectUnit(idx){
-  deselectUnits();
-  document.querySelectorAll('.unit-card')[idx].classList.add('selected');
-  const u = UNITS[idx];
-  if(u.from){
-    activeFrom = u.from; activeTo = u.to;
-    document.getElementById('range-from').value = activeFrom;
-    document.getElementById('range-to').value = activeTo;
-  }
-  buildBubbles(); updateCount();
-}
-
-function buildBubbles(){
-  const container = document.getElementById('page-bubbles');
-  container.innerHTML = '';
-  const allPages = Object.keys(VOCAB_BY_PAGE).map(Number).sort((a,b)=>a-b);
-  allPages.forEach(p => {
-    const bub = document.createElement('div');
-    const inRange = p >= activeFrom && p <= activeTo;
-    const isEdge  = p === activeFrom || p === activeTo;
-    bub.className = 'pb' + (isEdge ? ' range-start' : inRange ? ' in-range' : '');
-    bub.textContent = p;
-    bub.onclick = () => {
-      if(!bub._drag){
-        activeFrom = p; if(p > activeTo) activeTo = p;
-        document.getElementById('range-from').value = activeFrom;
-        document.getElementById('range-to').value = activeTo;
-        deselectUnits(); selectCustom(); buildBubbles(); updateCount();
-      }
-    };
-    bub.oncontextmenu = e => {
-      e.preventDefault();
-      activeTo = p; if(p < activeFrom) activeFrom = p;
-      document.getElementById('range-from').value = activeFrom;
-      document.getElementById('range-to').value = activeTo;
-      deselectUnits(); selectCustom(); buildBubbles(); updateCount();
-    };
-    container.appendChild(bub);
-  });
-}
-
-function updateCount(){
-  const n = countWords(activeFrom, activeTo);
+function setRange(from, to){
+  const min = PAGES[0], max = PAGES[PAGES.length-1];
+  activeFrom = Math.max(min, Math.min(max, from || min));
+  activeTo   = Math.max(min, Math.min(max, to || activeFrom));
+  if(activeTo < activeFrom) [activeFrom, activeTo] = [activeTo, activeFrom];
+  document.getElementById('range-from').value = activeFrom;
+  document.getElementById('range-to').value = activeTo;
+  const n = dedupe(getWords(activeFrom, activeTo)).length;
   document.getElementById('range-count').textContent = n + ' words';
   document.getElementById('start-btn').disabled = n < 4;
-  const fill = document.getElementById('range-vis-fill');
-  if(fill) fill.style.width = Math.max(2, Math.min(100, ((activeTo - 6) / (184 - 6)) * 100)) + '%';
+  renderBubbles();
 }
 
-function goToModes(){
-  isWeakMode = false;
-  const words = getWords(activeFrom, activeTo);
-  if(words.length < 4){ alert('Not enough words in this range.'); return; }
-  activeDeck = shuffle(words);
-  document.getElementById('mode-sub').textContent = activeDeck.length + ' words · pages ' + activeFrom + '–' + activeTo;
+// First tap sets the start page, second tap the end page
+function renderBubbles(){
+  const box = document.getElementById('page-bubbles');
+  if(!box.children.length) PAGES.forEach(p => {
+    const b = document.createElement('button');
+    b.className = 'pb'; b.textContent = p;
+    b.onclick = () => tapPage(p);
+    box.appendChild(b);
+  });
+  [...box.children].forEach(b => {
+    const p = +b.textContent;
+    b.classList.toggle('edge', p === activeFrom || p === activeTo);
+    b.classList.toggle('in', p > activeFrom && p < activeTo);
+  });
+  document.getElementById('bubble-hint').textContent = pickingEnd ? 'Now tap the last page.' : 'Or tap the first page, then the last page.';
+}
+function tapPage(p){
+  const isEnd = pickingEnd;
+  pickingEnd = !pickingEnd;
+  isEnd ? setRange(activeFrom, p) : setRange(p, p);
+}
+
+function startCustom(){ openSelection(activeFrom, activeTo, `Pages ${activeFrom}–${activeTo}`); }
+
+function openSelection(from, to, title){
+  isWeakMode = false; pickingEnd = false;
+  setRange(from, to);
+  sourceWords = poolWords = dedupe(getWords(activeFrom, activeTo));
+  if(sourceWords.length < 4) return;
+  document.getElementById('mode-title').textContent = title;
+  document.getElementById('mode-sub').textContent = `${sourceWords.length} words · pp. ${activeFrom}–${activeTo}`;
   show('mode-screen');
 }
 
 // ── Modes Core ──
 function startMode(m){
-  clearInterval(timeInterval);
+  clearInterval(timeInterval); roundId++;
   lastMode = m; current = 0; score = 0; wrong = [];
-  if(!isWeakMode){
-    const sel = document.getElementById('dir-select').value;
-    dir = sel === 'random' ? (Math.random() < .5 ? 'en-de' : 'de-en') : sel;
-    activeDeck = shuffle(activeDeck);
-  }
-  if(m === 'mcq' || m === 'timeattack') renderMCQ(m === 'timeattack');
+  deck = m === 'timeattack' ? shuffle(sourceWords) : buildRound(sourceWords);
+  if(!deck.length){ show('select-screen'); return; }
+  // Dictation always says the English word and expects it back in English
+  const d = m === 'dictation' ? 'de-en' : document.querySelector('input[name=dir]:checked').value;
+  dirs = deck.map(() => d === 'mixed' ? (Math.random() < .5 ? 'en-de' : 'de-en') : d);
+  if(m === 'mcq') renderMCQ();
+  else if(m === 'timeattack') startTimeAttack();
   else if(m === 'flashcard') renderFC();
   else if(m === 'match') renderMatch();
-  else if(m === 'type' || m === 'dictation') renderType(m === 'dictation');
+  else renderType();
 }
 
 function retryMode(){
-  if(isWeakMode) startWeakMode();
-  else startMode(lastMode);
+  if(isWeakMode){
+    sourceWords = weakWords.map(w => [w.en, w.de]);
+    if(!sourceWords.length){ show('select-screen'); return; }
+  }
+  startMode(lastMode);
 }
 
 // ── Voice ──
+function speakable(t){
+  return t.replace(/\bsth\b/g,'something').replace(/\bsb\b/g,'somebody')
+    .replace(/\b(pl|BE|AE|AusE)\b/g,'').replace(/[()]/g,'').replace(/\//g,' or ')
+    .replace(/\s+/g,' ').trim();
+}
 function playCurrentWord(){
-  const text = q(current);
-  const targetLang = dir === 'en-de' ? 'en' : 'de';
   if(!('speechSynthesis' in window)) return;
-  const utt = new SpeechSynthesisUtterance(text);
-  const voices = speechSynthesis.getVoices();
-  let best = voices.find(v => v.name.includes('Google') && v.lang.startsWith(targetLang));
-  if(!best) best = voices.find(v => v.name.includes('Premium') && v.lang.startsWith(targetLang));
-  if(!best) best = voices.find(v => v.lang.startsWith(targetLang));
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(speakable(deck[current][0]));
+  const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('en'));
+  const gb = v => v.lang.replace('_','-') === 'en-GB';
+  const good = v => /Google|Premium|Enhanced/.test(v.name);
+  const best = voices.find(v => good(v) && gb(v)) || voices.find(gb) || voices.find(good) || voices[0];
   if(best){ utt.voice = best; utt.lang = best.lang; }
-  else utt.lang = targetLang === 'en' ? 'en-GB' : 'de-DE';
+  else utt.lang = 'en-GB';
   utt.rate = 0.9;
   speechSynthesis.speak(utt);
 }
@@ -684,343 +701,301 @@ function playCurrentWord(){
 // ── Flashcard ──
 function renderFC(){
   show('flashcard-screen');
-  document.getElementById('fc-translation').style.display = 'none';
-  document.getElementById('fc-reveal-btn').style.display = 'block';
-  document.getElementById('fc-rate-btns').style.display = 'none';
-  document.getElementById('fc-dir').textContent = dirLabel();
+  document.getElementById('fc-translation').hidden = true;
+  document.getElementById('fc-reveal-btn').hidden = false;
+  document.getElementById('fc-rate-btns').hidden = true;
+  document.getElementById('fc-dir').textContent = dirLabel(current);
   document.getElementById('fc-word').textContent = q(current);
-  document.getElementById('fc-label').textContent = 'Card ' + (current+1) + ' of ' + activeDeck.length;
-  document.getElementById('fc-score').textContent = 'Got it: ' + score;
-  setProgress('fc-progress', current, activeDeck.length);
+  document.getElementById('fc-label').textContent = (current+1) + ' / ' + deck.length;
+  setProgress('fc-progress', current, deck.length);
 }
 function fcReveal(){
   document.getElementById('fc-translation').textContent = a(current);
-  document.getElementById('fc-translation').style.display = 'block';
-  document.getElementById('fc-reveal-btn').style.display = 'none';
-  document.getElementById('fc-rate-btns').style.display = 'flex';
+  document.getElementById('fc-translation').hidden = false;
+  document.getElementById('fc-reveal-btn').hidden = true;
+  document.getElementById('fc-rate-btns').hidden = false;
 }
 function fcRate(knew){
-  handleAnswerEvaluation(q(current), a(current), knew);
-  if(knew){ score++; } else { wrong.push({q:q(current),a:a(current)}); }
+  recordAnswer(deck[current], knew);
+  if(knew){ score++; } else { wrong.push({q:q(current), a:a(current)}); }
   current++;
-  current >= activeDeck.length ? showResult(score, activeDeck.length) : renderFC();
+  current >= deck.length ? showResult(score, deck.length) : renderFC();
 }
 
 // ── MCQ & Time Attack ──
-function renderMCQ(isTimeAttack=false){
-  show('mcq-screen');
-  document.getElementById('mcq-dir').textContent = dirLabel();
-  if(isTimeAttack){
-    document.getElementById('ta-timer-container').style.display = 'block';
-    document.getElementById('mcq-prog-container').style.display = 'none';
-    document.getElementById('mcq-label').textContent = 'Speed Run!';
-    timeLimit = 60;
-    document.getElementById('ta-timer').textContent = timeLimit + 's';
-    clearInterval(timeInterval);
-    timeInterval = setInterval(() => {
-      timeLimit--;
-      document.getElementById('ta-timer').textContent = timeLimit + 's';
-      if(timeLimit <= 0){ clearInterval(timeInterval); showResult(score, current); }
-    }, 1000);
-  } else {
-    document.getElementById('ta-timer-container').style.display = 'none';
-    document.getElementById('mcq-prog-container').style.display = 'block';
-    document.getElementById('mcq-label').textContent = 'Q ' + (current+1) + ' / ' + activeDeck.length;
-    setProgress('mcq-progress', current, activeDeck.length);
-  }
-  document.getElementById('mcq-score').textContent = 'Score: ' + score;
-  document.getElementById('mcq-word').textContent = q(current);
-  const correct = a(current);
-  const distractors = shuffle(activeDeck.filter((_,i)=>i!==current).map(w=>dir==='en-de'?w[1]:w[0]).filter(v=>v!==correct)).slice(0,3);
-  const opts = shuffle([correct, ...distractors]);
-  const grid = document.getElementById('mcq-options');
-  grid.innerHTML = '';
-  opts.forEach(opt => {
-    const b = document.createElement('button');
-    b.className = 'opt'; b.textContent = opt;
-    b.onclick = () => mcqPick(b, opt === correct, correct, isTimeAttack);
-    grid.appendChild(b);
-  });
+function startTimeAttack(){
+  timeLeft = 60;
+  timeInterval = setInterval(() => {
+    timeLeft--;
+    updateMCQLabel();
+    if(timeLeft <= 0) showResult(score, current);
+  }, 1000);
+  renderMCQ();
 }
 
-function mcqPick(btn, isCorrect, correct, isTimeAttack){
-  document.querySelectorAll('.opt').forEach(b => b.setAttribute('disabled','true'));
-  handleAnswerEvaluation(q(current), correct, isCorrect);
-  if(isCorrect){ btn.classList.add('correct'); score++; }
-  else{ btn.classList.add('wrong'); wrong.push({q:q(current),a:correct}); document.querySelectorAll('.opt').forEach(b=>{if(b.textContent===correct)b.classList.add('reveal');}); }
-  setTimeout(() => {
-    current++;
-    if(!isTimeAttack && current >= activeDeck.length){ showResult(score, activeDeck.length); return; }
-    if(current >= activeDeck.length) current = 0;
-    if(isTimeAttack && timeLimit > 0) renderMCQ(true);
-    else if(!isTimeAttack) renderMCQ(false);
-  }, isTimeAttack && isCorrect ? 300 : 900);
+function updateMCQLabel(){
+  const label = document.getElementById('mcq-label');
+  if(lastMode === 'timeattack'){
+    label.innerHTML = `<span class="timer">${timeLeft}s</span> · ${score}`;
+    setProgress('mcq-progress', 60 - timeLeft, 60);
+  } else {
+    label.textContent = (current+1) + ' / ' + deck.length;
+    setProgress('mcq-progress', current, deck.length);
+  }
+}
+
+// Wrong options: never a second correct answer, no repeats, and similar to the answer
+// (verbs next to verbs, similar length) so the right one doesn't stand out.
+function pickOptions(i){
+  const w = deck[i], qi = dirs[i] === 'en-de' ? 0 : 1, ai = 1 - qi, correct = w[ai];
+  const verb = x => x[0].startsWith('to ');
+  const used = new Set([correct]), cands = [];
+  for(const x of poolWords){
+    if(x[qi] === w[qi] || used.has(x[ai])) continue;
+    used.add(x[ai]);
+    const lenDiff = Math.abs(x[ai].length - correct.length) / Math.max(x[ai].length, correct.length);
+    cands.push({text:x[ai], cost:(verb(x) !== verb(w) ? 1 : 0) + lenDiff + Math.random() * .3});
+  }
+  cands.sort((m, n) => m.cost - n.cost);
+  return shuffle([correct, ...cands.slice(0, 3).map(c => c.text)]);
+}
+
+function renderMCQ(){
+  answered = false;
+  show('mcq-screen');
+  updateMCQLabel();
+  document.getElementById('mcq-dir').textContent = dirLabel(current);
+  const card = document.getElementById('mcq-word');
+  card.className = 'word-card';
+  card.textContent = q(current);
+  const grid = document.getElementById('mcq-options');
+  grid.innerHTML = '';
+  pickOptions(current).forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = opt;
+    b.onclick = () => mcqPick(b, opt);
+    grid.appendChild(b);
+  });
+  document.getElementById('mcq-next').hidden = true;
+}
+
+function mcqPick(btn, opt){
+  if(answered) return;
+  answered = true;
+  const correct = a(current), isCorrect = opt === correct, isTimeAttack = lastMode === 'timeattack';
+  document.querySelectorAll('#mcq-options .opt').forEach(b => {
+    b.disabled = true;
+    if(b.textContent === correct) b.classList.add('correct');
+  });
+  recordAnswer(deck[current], isCorrect);
+  flash(document.getElementById('mcq-word'), isCorrect);
+  if(isCorrect){ score++; }
+  else { btn.classList.add('wrong'); wrong.push({q:q(current), a:correct}); }
+  updateMCQLabel();
+  if(isCorrect || isTimeAttack) later(mcqNext, isTimeAttack ? (isCorrect ? 300 : 900) : 700);
+  else { const next = document.getElementById('mcq-next'); next.hidden = false; next.focus(); }
+}
+
+function mcqNext(){
+  current++;
+  if(current >= deck.length){
+    if(lastMode !== 'timeattack'){ showResult(score, deck.length); return; }
+    current = 0;
+  }
+  renderMCQ();
 }
 
 // ── Match ──
+function matchText(w, left){ return (dirs[0] === 'en-de') === left ? w[0] : w[1]; }
+
 function renderMatch(){
   show('match-screen');
-  matchSelected = null; matchPairs = []; matchDone = 0;
-  const pool = shuffle(activeDeck).slice(0,6);
-  matchPairs = pool.map(w => ({en:w[0], de:w[1], id:w[0]}));
-  const left = shuffle(matchPairs), right = shuffle(matchPairs);
-  document.getElementById('match-score').textContent = '0 / ' + matchPairs.length + ' matched';
-  setProgress('match-progress', 0, matchPairs.length);
-  const lCol = document.getElementById('match-left');
-  const rCol = document.getElementById('match-right');
-  lCol.innerHTML = ''; rCol.innerHTML = '';
-  left.forEach(p => {
-    const d = document.createElement('div'); d.className = 'match-item';
-    d.textContent = dir === 'en-de' ? p.en : p.de;
-    d.dataset.id = p.id; d.dataset.side = 'left';
-    d.onclick = () => matchClick(d); lCol.appendChild(d);
+  matchSelected = null; matchPairs = []; matchDone = 0; matchMissed = new Set();
+  // No two cards may show the same text, or a correct pairing could be rejected
+  const en = new Set(), de = new Set();
+  for(const w of [...deck, ...shuffle(poolWords)]){
+    if(matchPairs.length === 6) break;
+    if(en.has(w[0]) || de.has(w[1])) continue;
+    en.add(w[0]); de.add(w[1]); matchPairs.push(w);
+  }
+  ['left','right'].forEach(side => {
+    const col = document.getElementById('match-' + side);
+    col.innerHTML = '';
+    shuffle(matchPairs.map((_, i) => i)).forEach(i => {
+      const b = document.createElement('button');
+      b.className = 'match-item';
+      b.textContent = matchText(matchPairs[i], side === 'left');
+      b.dataset.id = i; b.dataset.side = side;
+      b.onclick = () => matchClick(b);
+      col.appendChild(b);
+    });
   });
-  right.forEach(p => {
-    const d = document.createElement('div'); d.className = 'match-item';
-    d.textContent = dir === 'en-de' ? p.de : p.en;
-    d.dataset.id = p.id; d.dataset.side = 'right';
-    d.onclick = () => matchClick(d); rCol.appendChild(d);
-  });
+  updateMatchLabel();
+}
+function updateMatchLabel(){
+  document.getElementById('match-label').textContent = matchDone + ' / ' + matchPairs.length;
+  setProgress('match-progress', matchDone, matchPairs.length);
 }
 function matchClick(el){
   if(el.classList.contains('matched')) return;
-  if(!matchSelected){ matchSelected = el; el.classList.add('selected'); }
-  else {
-    if(matchSelected === el){ el.classList.remove('selected'); matchSelected = null; return; }
-    if(matchSelected.dataset.side === el.dataset.side){ matchSelected.classList.remove('selected'); matchSelected = el; el.classList.add('selected'); return; }
-    const old = matchSelected; matchSelected = null; old.classList.remove('selected');
-    const pairAns = matchPairs.find(p=>p.id===old.dataset.id)?.[dir==='en-de'?'de':'en'] || '';
-    if(old.dataset.id === el.dataset.id){
-      [old,el].forEach(d => { d.classList.remove('selected'); d.classList.add('matched'); });
-      handleAnswerEvaluation(old.textContent, pairAns, true);
-      matchDone++;
-      document.getElementById('match-score').textContent = matchDone + ' / ' + matchPairs.length + ' matched';
-      setProgress('match-progress', matchDone, matchPairs.length);
-      if(matchDone >= matchPairs.length) setTimeout(() => showResult(matchPairs.length, matchPairs.length), 400);
-    } else {
-      handleAnswerEvaluation(old.textContent, pairAns, false);
-      wrong.push({q:old.textContent, a:pairAns});
-      [old,el].forEach(d => d.classList.add('wrong-flash'));
-      setTimeout(() => [old,el].forEach(d => d.classList.remove('wrong-flash')), 600);
+  if(!matchSelected || matchSelected.dataset.side === el.dataset.side){
+    if(matchSelected) matchSelected.classList.remove('selected');
+    matchSelected = matchSelected === el ? null : el;
+    if(matchSelected) el.classList.add('selected');
+    return;
+  }
+  const first = matchSelected; matchSelected = null;
+  first.classList.remove('selected');
+  const id = +first.dataset.id, pair = matchPairs[id];
+  if(first.dataset.id === el.dataset.id){
+    [first, el].forEach(b => { b.classList.add('matched'); b.disabled = true; });
+    if(!matchMissed.has(id)) recordAnswer(pair, true);
+    if(navigator.vibrate) navigator.vibrate(30);
+    matchDone++;
+    updateMatchLabel();
+    // Only pairs matched on the first try count as correct
+    if(matchDone >= matchPairs.length) later(() => showResult(matchPairs.length - matchMissed.size, matchPairs.length), 400);
+  } else {
+    if(!matchMissed.has(id)){
+      matchMissed.add(id);
+      recordAnswer(pair, false);
+      wrong.push({q:first.textContent, a:matchText(pair, first.dataset.side !== 'left')});
     }
+    if(navigator.vibrate) navigator.vibrate([60, 50, 60]);
+    [first, el].forEach(b => b.classList.add('wrong'));
+    setTimeout(() => [first, el].forEach(b => b.classList.remove('wrong')), 600);
   }
 }
 
 // ── Type & Dictation ──
-function renderType(isDictation=false){
+function renderType(){
+  const isDictation = lastMode === 'dictation';
+  answered = false;
   show('type-screen');
-  document.getElementById('type-dir').textContent = dirLabel();
-  document.getElementById('type-label').textContent = 'Q ' + (current+1) + ' / ' + activeDeck.length;
-  document.getElementById('type-score').textContent = 'Score: ' + score;
-  document.getElementById('type-feedback').textContent = '';
-  document.getElementById('type-feedback').style.color = '';
-  document.getElementById('type-input').value = '';
-  setProgress('type-progress', current, activeDeck.length);
-  if(isDictation){
-    document.getElementById('type-word').style.display = 'none';
-    document.getElementById('dictation-btn').style.display = 'flex';
-    playCurrentWord();
-  } else {
-    document.getElementById('type-word').style.display = 'flex';
-    document.getElementById('dictation-btn').style.display = 'none';
-    document.getElementById('type-word').textContent = q(current);
-  }
-  setTimeout(() => document.getElementById('type-input').focus(), 50);
-  document.getElementById('type-input').onkeydown = e => { if(e.key === 'Enter') typeCheck(isDictation); };
+  document.getElementById('type-dir').textContent = dirLabel(current);
+  document.getElementById('type-label').textContent = (current+1) + ' / ' + deck.length;
+  setProgress('type-progress', current, deck.length);
+  const card = document.getElementById('type-word');
+  card.className = 'word-card';
+  card.textContent = q(current);
+  card.hidden = isDictation;
+  document.getElementById('dictation-btn').hidden = !isDictation;
+  const fb = document.getElementById('type-feedback');
+  fb.textContent = ''; fb.className = 'feedback';
+  const input = document.getElementById('type-input');
+  input.value = '';
+  input.placeholder = isDictation ? 'Type the English word…' : 'Type the translation…';
+  document.getElementById('type-btns').hidden = false;
+  document.getElementById('type-next').hidden = true;
+  if(isDictation) playCurrentWord();
+  input.focus();
 }
 
-function typeCheck(isDictation){
-  const val = document.getElementById('type-input').value;
-  if(!val.trim()) return;
-  const ans = a(current);
-  const parts = ans.split(/[,\/]/).map(s=>s.trim());
-  const ok = parts.some(p => norm(val) === norm(p)) || norm(val) === norm(ans);
+function typeAnswered(isCorrect, message){
+  answered = true;
+  recordAnswer(deck[current], isCorrect);
   const fb = document.getElementById('type-feedback');
-  handleAnswerEvaluation(q(current), ans, ok);
-  if(ok){
-    fb.textContent = 'Correct!'; fb.style.color = 'var(--green)'; score++;
-    setTimeout(() => { current++; current >= activeDeck.length ? showResult(score, activeDeck.length) : renderType(isDictation); }, 650);
-  } else {
-    fb.textContent = 'Answer: ' + ans; fb.style.color = 'var(--red)';
-    wrong.push({q:q(current), a:ans});
-    if(isDictation) document.getElementById('type-word').style.display = 'flex';
-    setTimeout(() => { current++; current >= activeDeck.length ? showResult(score, activeDeck.length) : renderType(isDictation); }, 1800);
-  }
+  fb.textContent = message;
+  fb.className = 'feedback ' + (isCorrect ? 'ok' : 'bad');
+  document.getElementById('type-word').hidden = false;
+  document.getElementById('type-btns').hidden = true;
+  document.getElementById('type-next').hidden = false;
+  if(!isCorrect) wrong.push({q:q(current), a:a(current)});
+}
+
+function typeCheck(){
+  const val = document.getElementById('type-input').value;
+  if(answered || !val.trim()) return;
+  const res = checkAnswer(val, a(current));
+  typeAnswered(res.ok, res.almost ? 'Almost: ' + res.almost : res.ok ? 'Correct!' : 'Answer: ' + a(current));
+  flash(document.getElementById('type-word'), res.ok);
+  if(res.ok){ score++; later(typeNext, res.almost ? 1500 : 700); }
 }
 function typeSkip(){
-  handleAnswerEvaluation(q(current), a(current), false);
-  wrong.push({q:q(current), a:a(current)});
+  if(answered) return;
+  typeAnswered(false, 'Answer: ' + a(current));
+}
+function typeNext(){
+  if(!answered) return;
   current++;
-  const isDictation = lastMode === 'dictation';
-  current >= activeDeck.length ? showResult(score, activeDeck.length) : renderType(isDictation);
+  current >= deck.length ? showResult(score, deck.length) : renderType();
 }
 
 // ── Results ──
 function showResult(s, t){
+  clearInterval(timeInterval); roundId++;
+  if('speechSynthesis' in window) speechSynthesis.cancel();
   show('result-screen');
-  clearInterval(timeInterval);
   updateStreakData();
   awardBadge('first_blood');
   const hour = new Date().getHours();
   if(hour < 8)   awardBadge('early_bird');
   if(hour >= 22) awardBadge('night_owl');
+  const isTimeAttack = lastMode === 'timeattack';
   const pct = Math.round((s/t)*100);
-  if(pct === 100 && t >= 10 && lastMode !== 'timeattack') awardBadge('flawless');
-  if(lastMode === 'timeattack' && s >= 15) awardBadge('speed_demon');
-  document.getElementById('result-pct').textContent   = (lastMode === 'timeattack') ? s + ' Pts' : pct + '%';
-  const title = (lastMode === 'timeattack') ? (s>=15?'Amazing Speed!':'Good effort!') :
+  if(pct === 100 && t >= 10 && !isTimeAttack) awardBadge('flawless');
+  if(isTimeAttack && s >= 15) awardBadge('speed_demon');
+  document.getElementById('result-pct').textContent = isTimeAttack ? s : pct + '%';
+  document.getElementById('result-title').textContent = isTimeAttack ? (s>=15?'Amazing speed!':'Good effort!') :
     (pct===100?'Perfect!':pct>=80?'Great work!':pct>=60?'Good effort!':'Keep practising!');
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-sub').textContent   = (lastMode === 'timeattack') ? 'in 60 seconds' : s + ' / ' + t + ' correct · ' + dirLabel();
+  document.getElementById('result-sub').textContent = isTimeAttack ? 'correct answers in 60 seconds'
+    : lastMode === 'match' ? `${s} / ${t} matched on the first try` : `${s} / ${t} correct`;
   const wd = document.getElementById('result-wrong');
-  if(wrong.length && lastMode !== 'timeattack'){
+  if(wrong.length && !isTimeAttack){
     const uniq = [...new Map(wrong.map(w=>[w.q,w])).values()];
-    wd.innerHTML = '<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.55;margin-bottom:8px">Review these:</div>' +
-      uniq.map(w => `<div class="summary-row"><span style="flex:1">${w.q}</span><span style="flex:1;text-align:right;opacity:.6">${w.a}</span></div>`).join('');
+    wd.innerHTML = '<div class="label">Review these</div>' +
+      uniq.map(w => `<div class="review-row"><span>${w.q}</span><span>${w.a}</span></div>`).join('');
   } else { wd.innerHTML = ''; }
 }
 
 // ── Test Creator ──
-
-// 1. Add a variable to store the current test so we don't shuffle it again
 let currentTestState = null;
 
 function showTestCreator(){
   show('test-creator-screen');
-  document.getElementById('test-output').style.display = 'none';
-  document.getElementById('print-test-btn').style.display = 'none';
-  const maxQ = Math.min(activeDeck.length, 20);
-  document.getElementById('test-q-count').value = maxQ;
-  document.getElementById('test-q-count').max = activeDeck.length;
-  
-  // Reset the saved test when opening the creator screen
-  currentTestState = null; 
+  document.getElementById('test-output').hidden = true;
+  document.getElementById('print-test-btn').hidden = true;
+  const count = document.getElementById('test-q-count');
+  count.max = sourceWords.length;
+  count.value = Math.min(sourceWords.length, 20);
+  currentTestState = null;
 }
 
-function generateTest(showAnswers) {
-  if (!showAnswers || !currentTestState) {
-    let numQs = parseInt(document.getElementById('test-q-count').value) || 20;
-    if(numQs > activeDeck.length) numQs = activeDeck.length;
-
-    const shuffled = shuffle(activeDeck).slice(0, numQs);
-    const sel = document.getElementById('dir-select').value;
-    
+function generateTest(showAnswers){
+  // "Answer key" shows the answers to the test on screen; "New test" draws new words
+  if(!showAnswers || !currentTestState){
+    const n = Math.max(1, Math.min(sourceWords.length, parseInt(document.getElementById('test-q-count').value) || 20));
     currentTestState = {
-      questions: shuffled,
-      direction: sel // Store the exact selection ('en-de', 'de-en', or 'random')
+      questions: shuffle(sourceWords).slice(0, n),
+      direction: document.querySelector('input[name=dir]:checked').value
     };
   }
-
   const { questions, direction } = currentTestState;
-  const totalQs = questions.length;
+  const cls = document.getElementById('test-class').value.trim();
 
-  // 1. Build the Header 
-  let html = `
-    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 20px;">
-      <span>English/2BFP2</span>
-      <span>name: ___________________________</span>
-    </div>
-    <h2 style="text-align:center; margin-bottom: 30px;">Vocabulary Test</h2>
-  `;
+  const section = (title, list, d) =>
+    `<h3>${title} (${list.length})</h3><ul>` + list.map(w => {
+      const [qq, aa] = d === 'en-de' ? w : [w[1], w[0]];
+      return `<li class="vocab-row"><span>${qq}</span>${showAnswers ? `<span class="key">${aa}</span>` : '<span class="line"></span>'}</li>`;
+    }).join('') + '</ul>';
 
-  // Helper function to build a section (Word on left, Blank line on right)
-  const buildSection = (title, qList, dir) => {
-    let sec = `<h3 style="margin-bottom: 15px; font-size: 18px;">${title} (${qList.length})</h3>`;
-    sec += `<ul style="list-style: none; padding: 0; margin-bottom: 30px;">`;
-    
-    qList.forEach(w => {
-      const q = dir === 'en-de' ? w[0] : w[1];
-      const a = dir === 'en-de' ? w[1] : w[0];
-      
-      sec += showAnswers
-        ? `<li class="vocab-row"><span>&bull; ${q}</span> <span style="color:var(--green); font-weight:bold;">${a}</span></li>`
-        : `<li class="vocab-row"><span>&bull; ${q}</span> <span>_________________________________</span></li>`;
-    });
-    
-    sec += `</ul>`;
-    return sec;
-  };
-
-  // 2. Build the Sections
-  if (direction === 'random') {
-    // Split the test in half to mimic the PDF's two distinct sections
-    const half = Math.ceil(totalQs / 2);
-    html += buildSection('1. Translate these words into German.', questions.slice(0, half), 'en-de');
-    html += buildSection('2. Translate these words into English.', questions.slice(half), 'de-en');
+  let html = `<div class="sheet-head"><span>English${cls ? '/' + esc(cls) : ''}</span><span>Name: ______________________</span></div>
+    <h2>Vocabulary Test${showAnswers ? ' – Answer Key' : ''}</h2>`;
+  if(direction === 'mixed'){
+    const half = Math.ceil(questions.length / 2);
+    html += section('1. Translate these words into German.', questions.slice(0, half), 'en-de');
+    html += section('2. Translate these words into English.', questions.slice(half), 'de-en');
   } else {
-    // If they only picked one direction, just show one section
-    const title = direction === 'en-de' ? '1. Translate these words into German.' : '1. Translate these words into English.';
-    html += buildSection(title, questions, direction);
+    html += section(direction === 'en-de' ? '1. Translate these words into German.' : '1. Translate these words into English.', questions, direction);
   }
-
-  // 3. Build the Footer
-  html += `
-    <div style="display: flex; justify-content: flex-end; gap: 40px; font-weight: bold; font-size: 18px; margin-top: 40px;">
-      <span>Total: ______ / ${totalQs}</span>
-      <span>Grade: _________</span>
-    </div>
-  `;
+  html += `<div class="sheet-foot"><span>Total: ______ / ${questions.length}</span><span>Grade: _________</span></div>`;
 
   const out = document.getElementById('test-output');
   out.innerHTML = html;
-  out.style.display = 'block';
-  document.getElementById('print-test-btn').style.display = 'block';
+  out.hidden = false;
+  document.getElementById('print-test-btn').hidden = false;
 }
 
-function printTest() {
-  const content = document.getElementById('test-output').innerHTML;
-  const win = window.open('', '', 'height=800,width=800');
-
-  const printStyles = `
-    <style>
-      * { 
-        box-sizing: border-box; 
-      }
-      body {
-        font-family: system-ui, sans-serif;
-        padding: 20px;
-        color: #000;
-        margin: 0;
-      }
-      /* Ensure the words and lines are pushed to opposite sides */
-      .vocab-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        font-size: 16px;
-      }
-      
-      @media print {
-        @page { 
-          /* Slightly wider margins so the lines don't hit the edge */
-          margin: 1cm 1.5cm; 
-        }
-        body { 
-          padding: 0; 
-        }
-        .vocab-row { 
-          /* Give a little more breathing room on paper */
-          margin-bottom: 18px; 
-          break-inside: avoid; 
-        }
-        /* Force exact colors for printing */
-        * { color: #000 !important; }
-        span[style*="--green"] { color: #2e7d32 !important; }
-      }
-    </style>
-  `;
-
-  win.document.write(`<html><head><title>Vocabulary Test</title>${printStyles}</head><body>`);
-  win.document.write(content);
-  win.document.write('</body></html>');
-  win.document.close();
-  win.focus();
-  
-  setTimeout(() => { 
-    win.print(); 
-    win.close(); 
-  }, 250);
-}
 // ── Boot ──
 initApp();
 </script>

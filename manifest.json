@@ -1,24 +1,30 @@
 {
-  "name": "Vocab Trainer – BFP1",
-  "short_name": "Vocab BFP1",
-  "description": "English-German vocabulary trainer for BFP1",
+  "name": "Vocab Trainer – BFS",
+  "short_name": "Vocab BFS",
+  "description": "English-German vocabulary trainer for BFS",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f9f8f6",
-  "theme_color": "#1a56b0",
+  "background_color": "#faf8f3",
+  "theme_color": "#faf8f3",
   "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
